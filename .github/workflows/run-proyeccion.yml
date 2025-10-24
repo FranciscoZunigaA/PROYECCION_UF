@@ -1,0 +1,42 @@
+name: Ejecutar proyección UF
+
+on:
+  workflow_dispatch:  # Permite ejecutarlo manualmente desde la pestaña Actions
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            # Dependencias mínimas si no hay requirements.txt
+            pip install pandas openpyxl
+          fi
+
+      - name: Run script
+        run: |
+          python proyeccion_uf.py
+
+      # Si tu script genera un archivo, por ejemplo proyeccion_uf.xlsx, súbelo como artefacto
+      - name: Upload artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: salida-proyeccion-uf
+          path: |
+            proyeccion_uf.xlsx
+            *.xlsx
+          if-no-files-found: warn
